@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Player</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #1c1c1c;
+            min-height: 100vh;
+            display: flex;
+            padding: 20px;
+            user-select: none;
+        }
+
+        .sidebar {
+            width: 300px;
+            padding: 20px;
+            border-right: 2px solid #666666;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .upload-btn {
+            background-color: #666666;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex; align-items: center;
+        }
+
+        .upload-btn:hover {
+            background-color: #bdd6ff;
+            color: #1c1c1c;
+        }
+
+        .video-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+        }
+
+        .video-item {
+            padding: 15px 20px;
+            background-color: transparent;
+            border: 2px solid #666666;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .video-item.active {
+            border-color: #bdd6ff;
+        }
+
+        .video-item:hover {
+            border-color: #bdd6ff;
+        }
+
+        .video-container {
+            width: 100%;
+            max-height: 70vh;
+            background-color: black;
+            border-radius: 25px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            border-radius: 25px;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .video-container:hover .controls {
+            opacity: 1;
+        }
+
+        .progress-bar {
+            flex-grow: 1;
+            height: 5px;
+            background: #666666;
+            border-radius: 25px;
+            cursor: pointer;
+        }
+
+        .progress {
+            height: 100%;
+            background: #bdd6ff;
+            border-radius: 25px;
+            width: 0%;
+        }
+
+        .time {
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .control-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .video-info {
+            color: white;
+            padding: 20px;
+            border: 2px solid #666666;
+            border-radius: 25px;
+        }
+.material-symbols-rounded {
+  font-variation-settings:
+  'FILL' 1,
+  'wght' 700,
+  'GRAD' 0,
+  'opsz' 24
+}
+    </style>
+</head>
+<body>
+<div class="main-content">
+    <div class="video-container" id="videoContainer">
+        <video id="videoPlayer"></video>
+        <div class="controls">
+            <button class="control-btn" id="playPause">
+                <span class="material-symbols-rounded">play_arrow</span>
+            </button>
+            <div class="progress-bar">
+                <div class="progress"></div>
+            </div>
+            <span class="time">0:00 / 0:00</span>
+            <button class="control-btn" id="fullscreen">
+                <span class="material-symbols-rounded">fullscreen</span>
+            </button>
+        </div>
+    </div>
+    <div class="video-info">
+        <h2 id="videoTitle">Clapper</h2>
+    </div>
+    <div class="video-list"></div>
+    <label class="upload-btn">
+        <span class="material-symbols-rounded">add</span> Add Video
+        <input type="file" accept="video/*,.mkv" style="display: none" id="videoUpload">
+    </label>
+</div>
+
+    <script>
+        const videoList = document.querySelector('.video-list');
+        const videoUpload = document.getElementById('videoUpload');
+        const videoPlayer = document.getElementById('videoPlayer');
+        const videoTitle = document.getElementById('videoTitle');
+        const playPauseBtn = document.getElementById('playPause');
+        const progressBar = document.querySelector('.progress-bar');
+        const progress = document.querySelector('.progress');
+        const timeDisplay = document.querySelector('.time');
+        const fullscreenBtn = document.getElementById('fullscreen');
+        const videoContainer = document.getElementById('videoContainer');
+
+        let videos = JSON.parse(localStorage.getItem('videos')) || [];
+        let currentVideoId = null;
+        let isDragging = false;
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.floor(seconds % 60);
+            return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+
+        function addVideo(file) {
+            const video = {
+                id: Date.now(),
+                name: file.name,
+                url: URL.createObjectURL(file),
+                timestamp: 0
+            };
+            videos.unshift(video);
+            saveVideos();
+            renderVideos();
+            loadVideo(video);
+        }
+
+        function saveVideos() {
+            localStorage.setItem('videos', JSON.stringify(videos.map(v => ({
+                id: v.id,
+                name: v.name,
+                timestamp: v.timestamp
+            }))));
+        }
+
+        function renderVideos() {
+            videoList.innerHTML = videos.map(video => `
+                <div class="video-item ${video.id === currentVideoId ? 'active' : ''}" 
+                     data-id="${video.id}">
+                    <div>${video.name}</div>
+                </div>
+            `).join('');
+
+            document.querySelectorAll('.video-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const video = videos.find(v => v.id === parseInt(item.dataset.id));
+                    if (video) {
+                        currentVideoId = video.id;
+                        loadVideo(video);
+                        renderVideos();
+                    }
+                });
+            });
+        }
+
+        function loadVideo(video) {
+            videoPlayer.src = video.url;
+            videoTitle.textContent = video.name;
+            videoPlayer.currentTime = video.timestamp || 0;
+        }
+
+function updateProgress() {
+    if (videoPlayer.duration) {
+        const percentage = (videoPlayer.currentTime / videoPlayer.duration) * 100;
+        progress.style.width = `${percentage}%`; // Update the progress bar's width
+        timeDisplay.textContent = `${formatTime(videoPlayer.currentTime)} / ${formatTime(videoPlayer.duration)}`;
+    }
+}
+
+function togglePlayPause() {
+    if (videoPlayer.paused) {
+        videoPlayer.play();
+        playPauseBtn.innerHTML = '<span class="material-symbols-rounded">pause</span>';
+    } else {
+        videoPlayer.pause();
+        playPauseBtn.innerHTML = '<span class="material-symbols-rounded">play_arrow</span>';
+    }
+}
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                videoContainer.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+function seekVideo(e) {
+    const rect = progressBar.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const newTime = (clickX / rect.width) * videoPlayer.duration;
+    videoPlayer.currentTime = newTime;
+}
+
+        function handleProgressDrag(e) {
+            if (isDragging) {
+                seekVideo(e);
+            }
+        }
+
+        function handleKeyboardControls(e) {
+            switch (e.key.toLowerCase()) {
+                case ' ': // Play/Pause
+                    e.preventDefault();
+                    togglePlayPause();
+                    break;
+                case 'arrowleft': // Seek backward
+                    videoPlayer.currentTime = Math.max(0, videoPlayer.currentTime - 5);
+                    break;
+                case 'arrowright': // Seek forward
+                    videoPlayer.currentTime = Math.min(videoPlayer.duration, videoPlayer.currentTime + 5);
+                    break;
+                case 'f': // Fullscreen toggle
+                    toggleFullscreen();
+                    break;
+            }
+        }
+
+        // Event listeners
+        videoUpload.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                addVideo(e.target.files[0]);
+            }
+        });
+
+        videoPlayer.addEventListener('timeupdate', updateProgress);
+
+        playPauseBtn.addEventListener('click', togglePlayPause);
+
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+        progressBar.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            seekVideo(e);
+        });
+
+videoPlayer.addEventListener('loadedmetadata', () => {
+    timeDisplay.textContent = `0:00 / ${formatTime(videoPlayer.duration)}`;
+});
+
+progressBar.addEventListener('mousemove', (e) => {
+    if (isDragging) seekVideo(e); // Update only while dragging
+});
+
+progressBar.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    seekVideo(e); // Adjust the video immediately on click
+});
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        progressBar.addEventListener('click', seekVideo);
+
+        document.addEventListener('keydown', handleKeyboardControls);
+
+        // Initial render
+        renderVideos();
+    </script>
+</body>
+</html>
