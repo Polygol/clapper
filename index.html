@@ -195,10 +195,31 @@
         const fullscreenBtn = document.getElementById('fullscreen');
         const videoContainer = document.getElementById('videoContainer');
 
+        let db;
         let videos = JSON.parse(localStorage.getItem('videos')) || [];
         let currentVideoId = null;
         let isDragging = false;
 
+const initDB = () => {
+    const request = indexedDB.open('videoDB', 1);
+    
+    request.onerror = (event) => {
+        console.error('IndexedDB error:', event.target.error);
+    };
+
+    request.onupgradeneeded = (event) => {
+        db = event.target.result;
+        if (!db.objectStoreNames.contains('videoFiles')) {
+            db.createObjectStore('videoFiles', { keyPath: 'id' });
+        }
+    };
+
+    request.onsuccess = (event) => {
+        db = event.target.result;
+        loadVideosFromStorage();
+    };
+};
+        
         function formatTime(seconds) {
             const minutes = Math.floor(seconds / 60);
             const remainingSeconds = Math.floor(seconds % 60);
@@ -226,26 +247,55 @@
             }))));
         }
 
-        function renderVideos() {
-            videoList.innerHTML = videos.map(video => `
-                <div class="video-item ${video.id === currentVideoId ? 'active' : ''}" 
-                     data-id="${video.id}">
-                    <div>${video.name}</div>
-                </div>
-            `).join('');
+function renderVideos() {
+    videoList.innerHTML = videos.map(video => `
+        <div class="video-item ${video.id === currentVideoId ? 'active' : ''}" 
+             data-id="${video.id}">
+            <div>${video.name}</div>
+        </div>
+    `).join('');
 
-            document.querySelectorAll('.video-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    const video = videos.find(v => v.id === parseInt(item.dataset.id));
-                    if (video) {
+    document.querySelectorAll('.video-item').forEach(item => {
+        item.addEventListener('click', async () => {
+            const videoId = parseInt(item.dataset.id);
+            const video = videos.find(v => v.id === videoId);
+            
+            if (video) {
+                const transaction = db.transaction(['videoFiles'], 'readonly');
+                const store = transaction.objectStore('videoFiles');
+                const request = store.get(videoId);
+                
+                request.onsuccess = (event) => {
+                    if (request.result) {
+                        video.url = URL.createObjectURL(request.result.file);
                         currentVideoId = video.id;
                         loadVideo(video);
                         renderVideos();
                     }
-                });
-            });
-        }
+                };
+            }
+        });
+    });
+}
 
+async function addVideo(file) {
+    const video = {
+        id: Date.now(),
+        name: file.name,
+        timestamp: 0
+    };
+
+    const transaction = db.transaction(['videoFiles'], 'readwrite');
+    const store = transaction.objectStore('videoFiles');
+    store.put({ id: video.id, file: file });
+    
+    videos.unshift(video);
+    saveVideos();
+    renderVideos();
+    video.url = URL.createObjectURL(file);
+    loadVideo(video);
+}
+        
         function loadVideo(video) {
             videoPlayer.src = video.url;
             videoTitle.textContent = video.name;
@@ -348,8 +398,31 @@ progressBar.addEventListener('mousedown', (e) => {
 
         document.addEventListener('keydown', handleKeyboardControls);
 
-        // Initial render
+async function loadVideosFromStorage() {
+    const storedVideos = JSON.parse(localStorage.getItem('videos')) || [];
+    videos = storedVideos;
+    
+    if (videos.length > 0) {
+        // Load the first video
+        const firstVideo = videos[0];
+        const transaction = db.transaction(['videoFiles'], 'readonly');
+        const store = transaction.objectStore('videoFiles');
+        const request = store.get(firstVideo.id);
+        
+        request.onsuccess = (event) => {
+            if (request.result) {
+                firstVideo.url = URL.createObjectURL(request.result.file);
+                currentVideoId = firstVideo.id;
+                loadVideo(firstVideo);
+            }
+        };
+    }
+    renderVideos();
+}
+        
+        // Initial
         renderVideos();
+        initDB();
     </script>
 </body>
 </html>
