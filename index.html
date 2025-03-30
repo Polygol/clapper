@@ -72,10 +72,10 @@
         /* Background Video Styling */
         .background-video-container {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
             z-index: -1;
         }
         
@@ -83,7 +83,7 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            filter: blur(50px) brightness(0.5); /* Apply blur effect */
+            filter: blur(50px) brightness(0.6); /* Apply blur effect */
             opacity: 0;
             transition: opacity 0.3s ease;
         }
@@ -91,6 +91,11 @@
         /* Show the background only when video is playing */
         body.video-playing #background-video {
             opacity: 1;
+        }
+
+        /* Light theme background blur with reduced opacity */
+        body.light-theme .background-video {
+            opacity: 0.5; /* 50% opacity for light theme */
         }
         
         .sidebar {
@@ -445,6 +450,7 @@ function loadVideo(video) {
 
     // Sync the background video with the main video
     backgroundVideo.src = video.url;
+    backgroundVideo.currentTime = video.timestamp || 0;  // Match the current time
 }
 
 function updateProgress() {
@@ -566,15 +572,27 @@ async function loadVideosFromStorage() {
 }
 
 videoPlayer.addEventListener('play', () => {
+    // Ensure the background video stays visible and synced when playing
+    backgroundVideo.style.opacity = 1;
     body.classList.add('video-playing');
 });
 
 videoPlayer.addEventListener('pause', () => {
+    // Keep the background video playing but slightly faded when paused
+    backgroundVideo.style.opacity = 0.5;
     body.classList.remove('video-playing');
 });
 
 videoPlayer.addEventListener('ended', () => {
+    // Keep the background video visible after the main video ends
+    backgroundVideo.style.opacity = 0.5;
     body.classList.remove('video-playing');
+});
+
+videoPlayer.addEventListener('timeupdate', () => {
+    if (!backgroundVideo.paused) {
+        backgroundVideo.currentTime = videoPlayer.currentTime;
+    }
 });
 
 // Theme synchronization for app side
