@@ -570,22 +570,25 @@ async function loadVideosFromStorage() {
     }
     renderVideos();
 }
-
+        
 videoPlayer.addEventListener('play', () => {
-    // Ensure the background video stays visible and synced when playing
-    backgroundVideo.style.opacity = 1;
+    // Sync the background video time and make it play when the main video plays
+    backgroundVideo.currentTime = videoPlayer.currentTime;
+    backgroundVideo.play();
+    backgroundVideo.style.opacity = 1;  // Make it fully visible
     body.classList.add('video-playing');
 });
 
 videoPlayer.addEventListener('pause', () => {
-    // Keep the background video playing but slightly faded when paused
-    backgroundVideo.style.opacity = 0.5;
+    // Pause the background video when the main video pauses
+    backgroundVideo.pause();
     body.classList.remove('video-playing');
 });
-
+    
 videoPlayer.addEventListener('ended', () => {
-    // Keep the background video visible after the main video ends
-    backgroundVideo.style.opacity = 0.5;
+    // Keep the background video in place but pause it when the main video ends
+    backgroundVideo.pause();
+    backgroundVideo.style.opacity = 0;
     body.classList.remove('video-playing');
 });
 
