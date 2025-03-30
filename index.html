@@ -98,11 +98,6 @@
             align-items: center;
         }
         
-        .upload-btn:hover {
-            background-color: var(--text-color);
-            color: var(--background-color);
-        }
-        
         .video-list {
             display: flex;
             flex-direction: column;
@@ -281,18 +276,18 @@
             <div class="progress-bar">
                 <div class="progress"></div>
             </div>
-            <span class="time">0:00 / 0:00</span>
+            <span class="time">--:-- / --:--</span>
             <button class="control-btn" id="fullscreen">
                 <span class="material-symbols-rounded">fullscreen</span>
             </button>
         </div>
     </div>
     <div class="video-info">
-        <h2 id="videoTitle">Clapper</h2>
+        <h2 id="videoTitle">No video playing</h2>
     </div>
     <div class="video-list"></div>
     <label class="upload-btn">
-        <span class="material-symbols-rounded">add</span> Add Video
+        <span class="material-symbols-rounded">add</span> Add
         <input type="file" accept="video/*,.mkv" style="display: none" id="videoUpload">
     </label>
 </div>
