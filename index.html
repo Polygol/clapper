@@ -437,11 +437,14 @@ async function addVideo(file) {
     loadVideo(video);
 }
         
-        function loadVideo(video) {
-            videoPlayer.src = video.url;
-            videoTitle.textContent = video.name;
-            videoPlayer.currentTime = video.timestamp || 0;
-        }
+function loadVideo(video) {
+    videoPlayer.src = video.url;
+    videoTitle.textContent = video.name;
+    videoPlayer.currentTime = video.timestamp || 0;
+
+    // Sync the background video with the main video
+    backgroundVideo.src = video.url;
+}
 
 function updateProgress() {
     if (videoPlayer.duration) {
@@ -560,6 +563,18 @@ async function loadVideosFromStorage() {
     }
     renderVideos();
 }
+
+videoPlayer.addEventListener('play', () => {
+    body.classList.add('video-playing');
+});
+
+videoPlayer.addEventListener('pause', () => {
+    body.classList.remove('video-playing');
+});
+
+videoPlayer.addEventListener('ended', () => {
+    body.classList.remove('video-playing');
+});
 
 // Theme synchronization for app side
 document.addEventListener('DOMContentLoaded', () => {
