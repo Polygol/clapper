@@ -155,7 +155,7 @@
         .video-container {
             width: 100%;
             max-height: 70vh;
-            background-color: transparent;
+            background-color: black;
             border-radius: 25px;
             overflow: hidden;
             position: relative;
@@ -467,13 +467,15 @@ function togglePlayPause() {
     }
 }
 
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                videoContainer.requestFullscreen();
-            } else {
-                document.exitFullscreen();
-            }
-        }
+function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+        videoContainer.requestFullscreen();
+        videoContainer.style.borderRadius = "0";
+    } else {
+        document.exitFullscreen();
+        videoContainer.style.borderRadius = "25px"; // Restore original value
+    }
+}
 
 function seekVideo(e) {
     const rect = progressBar.getBoundingClientRect();
