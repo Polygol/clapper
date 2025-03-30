@@ -86,6 +86,7 @@
             filter: blur(50px) brightness(0.6); /* Apply blur effect */
             opacity: 0;
             transition: opacity 0.3s ease;
+            will-change: transform, opacity;
         }
         
         /* Show the background only when video is playing */
@@ -593,7 +594,10 @@ videoPlayer.addEventListener('ended', () => {
 });
 
 videoPlayer.addEventListener('timeupdate', () => {
-    if (!backgroundVideo.paused) {
+    updateProgress();
+    
+    // If the background video is more than 0.1 sec out-of-sync, update it.
+    if (Math.abs(backgroundVideo.currentTime - videoPlayer.currentTime) > 0.1) {
         backgroundVideo.currentTime = videoPlayer.currentTime;
     }
 });
