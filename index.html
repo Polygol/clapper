@@ -630,7 +630,7 @@ videoPlayer.addEventListener('ended', () => {
     backgroundVideo.pause();
     backgroundVideo.style.opacity = 0;
     body.classList.remove('video-playing');
-    Gurasuraisu.hideMusicWidget();
+    Gurasuraisu.clearMediaSession();
 });
 
 videoPlayer.addEventListener('timeupdate', () => {
