@@ -7,7 +7,7 @@
     <link rel="icon" href="favicon.png" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
-    <script src="/assets/gurapp/api/gurasuraisu-api.js" defer></script>
+    <script src="/assets/gurapp/api/gurasuraisu-api.js"></script>
     <style>
         :root {
             /* Dark Theme (Default) Variables */
@@ -318,36 +318,36 @@
         }
     </style>
 </head>
-<body>
-<div class="background-video-container">
-    <video id="background-video" autoplay loop muted></video>
-</div>
-
-<div class="main-content">
-    <div class="video-container" id="videoContainer">
-        <video id="videoPlayer"></video>
-        <div class="controls">
-            <button class="control-btn" id="playPause">
-                <span class="material-symbols-rounded">play_arrow</span>
-            </button>
-            <div class="progress-bar">
-                <div class="progress"></div>
+<body data-app-name="Clapper">
+    <div class="background-video-container">
+        <video id="background-video" autoplay loop muted></video>
+    </div>
+    
+    <div class="main-content">
+        <div class="video-container" id="videoContainer">
+            <video id="videoPlayer"></video>
+            <div class="controls">
+                <button class="control-btn" id="playPause">
+                    <span class="material-symbols-rounded">play_arrow</span>
+                </button>
+                <div class="progress-bar">
+                    <div class="progress"></div>
+                </div>
+                <span class="time">--:-- / --:--</span>
+                <button class="control-btn" id="fullscreen">
+                    <span class="material-symbols-rounded">fullscreen</span>
+                </button>
             </div>
-            <span class="time">--:-- / --:--</span>
-            <button class="control-btn" id="fullscreen">
-                <span class="material-symbols-rounded">fullscreen</span>
-            </button>
         </div>
+        <div class="video-info">
+            <h2 id="videoTitle">No video playing</h2>
+        </div>
+        <div class="video-list"></div>
+        <label class="upload-btn">
+            <span class="material-symbols-rounded">add</span> Add
+            <input type="file" accept="video/*,.mkv" style="display: none" id="videoUpload">
+        </label>
     </div>
-    <div class="video-info">
-        <h2 id="videoTitle">No video playing</h2>
-    </div>
-    <div class="video-list"></div>
-    <label class="upload-btn">
-        <span class="material-symbols-rounded">add</span> Add
-        <input type="file" accept="video/*,.mkv" style="display: none" id="videoUpload">
-    </label>
-</div>
 
     <script>
         const videoList = document.querySelector('.video-list');
@@ -474,6 +474,13 @@ function loadVideo(video) {
     // Sync the background video with the main video
     backgroundVideo.src = video.url;
     backgroundVideo.currentTime = video.timestamp || 0;  // Match the current time
+
+    // --- Register the media session with a "thumbnail" ---
+    // Since videos don't have album art, we'll use the app's own icon.
+    Gurasuraisu.showMusicWidget({
+        artworkUrl: '/assets/appicon/video.png', // Using the app's icon as a placeholder
+        playbackState: 'paused' // It's paused until the user clicks play
+    });
 }
 
 function updateProgress() {
@@ -488,9 +495,11 @@ function togglePlayPause() {
     if (videoPlayer.paused) {
         videoPlayer.play();
         playPauseBtn.innerHTML = '<span class="material-symbols-rounded">pause</span>';
+        Gurasuraisu.updateMusicWidgetState({ playbackState: 'playing' });
     } else {
         videoPlayer.pause();
         playPauseBtn.innerHTML = '<span class="material-symbols-rounded">play_arrow</span>';
+        Gurasuraisu.updateMusicWidgetState({ playbackState: 'paused' });
     }
 }
 
@@ -602,12 +611,14 @@ videoPlayer.addEventListener('play', () => {
     backgroundVideo.play();
     backgroundVideo.style.opacity = 1;  // Make it fully visible
     body.classList.add('video-playing');
+    Gurasuraisu.updateMusicWidgetState({ playbackState: 'playing' });
 });
 
 videoPlayer.addEventListener('pause', () => {
     // Pause the background video when the main video pauses
     backgroundVideo.pause();
     body.classList.remove('video-playing');
+    Gurasuraisu.updateMusicWidgetState({ playbackState: 'paused' });
 });
     
 videoPlayer.addEventListener('ended', () => {
@@ -615,6 +626,7 @@ videoPlayer.addEventListener('ended', () => {
     backgroundVideo.pause();
     backgroundVideo.style.opacity = 0;
     body.classList.remove('video-playing');
+    Gurasuraisu.hideMusicWidget();
 });
 
 videoPlayer.addEventListener('timeupdate', () => {
@@ -625,6 +637,16 @@ videoPlayer.addEventListener('timeupdate', () => {
         backgroundVideo.currentTime = videoPlayer.currentTime;
     }
 });
+        // --- Listen for commands from the parent widget ---
+        document.addEventListener('DOMContentLoaded', () => {
+            Gurasuraisu.onMediaControl({
+                playPause: () => {
+                    // Just simulate a click on the app's own button
+                    document.getElementById('playPause').click();
+                }
+                // 'next' and 'prev' are not implemented for Clapper, so we omit them.
+            });
+        });
         
         // Initial
         renderVideos();
