@@ -477,10 +477,14 @@ function loadVideo(video) {
 
     // --- Register the media session with a "thumbnail" ---
     // Since videos don't have album art, we'll use the app's own icon.
-    Gurasuraisu.showMusicWidget({
-        artworkUrl: '/assets/appicon/video.png', // Using the app's icon as a placeholder
-        playbackState: 'paused' // It's paused until the user clicks play
-    });
+    Gurasuraisu.registerMediaSession(
+        {
+            title: video.name,
+            artist: 'Clapper', // Use a placeholder for artist
+            artwork: [{ src: '/assets/appicon/video.png' }] // Use the correct artwork format
+        },
+        ['playPause'] // The list of supported actions for this app
+    );
 }
 
 function updateProgress() {
@@ -495,11 +499,11 @@ function togglePlayPause() {
     if (videoPlayer.paused) {
         videoPlayer.play();
         playPauseBtn.innerHTML = '<span class="material-symbols-rounded">pause</span>';
-        Gurasuraisu.updateMusicWidgetState({ playbackState: 'playing' });
+        Gurasuraisu.updatePlaybackState({ playbackState: 'playing' });
     } else {
         videoPlayer.pause();
         playPauseBtn.innerHTML = '<span class="material-symbols-rounded">play_arrow</span>';
-        Gurasuraisu.updateMusicWidgetState({ playbackState: 'paused' });
+        Gurasuraisu.updatePlaybackState({ playbackState: 'paused' });
     }
 }
 
@@ -611,14 +615,14 @@ videoPlayer.addEventListener('play', () => {
     backgroundVideo.play();
     backgroundVideo.style.opacity = 1;  // Make it fully visible
     body.classList.add('video-playing');
-    Gurasuraisu.updateMusicWidgetState({ playbackState: 'playing' });
+    Gurasuraisu.updatePlaybackState({ playbackState: 'playing' });
 });
 
 videoPlayer.addEventListener('pause', () => {
     // Pause the background video when the main video pauses
     backgroundVideo.pause();
     body.classList.remove('video-playing');
-    Gurasuraisu.updateMusicWidgetState({ playbackState: 'paused' });
+    Gurasuraisu.updatePlaybackState({ playbackState: 'paused' });
 });
     
 videoPlayer.addEventListener('ended', () => {
