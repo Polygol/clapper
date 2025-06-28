@@ -635,12 +635,21 @@ videoPlayer.addEventListener('ended', () => {
 
 videoPlayer.addEventListener('timeupdate', () => {
     updateProgress();
+
+    // Send the progress state to the Gurasu parent to update the media widget.
+    if (videoPlayer.duration) {
+        Gurasuraisu.updateMediaProgress({
+            currentTime: videoPlayer.currentTime,
+            duration: videoPlayer.duration
+        });
+    }
     
     // If the background video is more than 0.1 sec out-of-sync, update it.
     if (Math.abs(backgroundVideo.currentTime - videoPlayer.currentTime) > 0.1) {
         backgroundVideo.currentTime = videoPlayer.currentTime;
     }
 });
+        
         // --- Listen for commands from the parent widget ---
         document.addEventListener('DOMContentLoaded', () => {
             Gurasuraisu.onMediaControl({
