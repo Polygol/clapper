@@ -166,7 +166,7 @@
             color: var(--text-color);
             cursor: pointer;
             transition: all 0.3s ease;
-            background-filter: blur(5px) var(--edge-refraction-filter);
+            background-filter: blur(5px) saturate(2) var(--edge-refraction-filter);
         }
         
         .video-item.active {
@@ -203,7 +203,7 @@
             align-items: center;
             opacity: 0;
             transition: opacity 0.3s;
-            backdrop-filter: blur(5px) var(--edge-refraction-filter);
+            backdrop-filter: blur(5px) saturate(2) var(--edge-refraction-filter);
             border-radius: 16px;
             border: 1px solid var(--glass-border);
         }
@@ -218,7 +218,7 @@
             background: var(--search-background);
             border-radius: 25px;
             cursor: pointer;
-            backdrop-filter: blur(5px) var(--edge-refraction-filter);
+            backdrop-filter: blur(5px) saturate(2) var(--edge-refraction-filter);
             transition: all 0.25s ease;
             box-shadow: 0 0 0 1px var(--glass-border);
             overflow: hidden;
