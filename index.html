@@ -12,6 +12,7 @@
     <style>
         :root {
             --edge-refraction-filter: url('#edge-refraction-only');
+            --sun-shadow: 0 0 0 0 transparent;
             
             /* Dark Theme (Default) Variables */
             --background-color-dark: #1c1c1c;
@@ -167,6 +168,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             background-filter: blur(5px) saturate(2) var(--edge-refraction-filter);
+            box-shadow: var(--sun-shadow);
         }
         
         .video-item.active {
@@ -207,7 +209,7 @@
             backdrop-filter: blur(5px) saturate(2) var(--edge-refraction-filter);
             border-radius: 25px;
             border: 1px solid var(--glass-border);
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            box-shadow: var(--sun-shadow), 0 0 15px rgba(0, 0, 0, 0.05);
         }
         
         .controls:hover {
@@ -222,7 +224,7 @@
             cursor: pointer;
             backdrop-filter: blur(5px) saturate(2) var(--edge-refraction-filter);
             transition: all 0.25s ease;
-            box-shadow: 0 0 0 1px var(--glass-border);
+            box-shadow: var(--sun-shadow), 0 0 0 1px var(--glass-border);
             overflow: hidden;
         }
         
