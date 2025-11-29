@@ -201,8 +201,20 @@
             bottom: 10px;
             left: 10px;
             right: 10px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .controls:hover {
+            opacity: 1;
+        }
+
+        .progress-bar-container {
             background: var(--search-background);
-            padding: 12px 14px;
+            padding: 12px 24px 12px 20px;
             display: flex;
             gap: 10px;
             align-items: center;
@@ -212,10 +224,7 @@
             border-radius: 30px;
             border: 1px solid var(--glass-border);
             box-shadow: var(--sun-shadow), 0 0 15px rgba(0, 0, 0, 0.05);
-        }
-        
-        .controls:hover {
-            opacity: 1;
+            width: -webkit-fill-available;
         }
 
         .progress-bar {
@@ -246,11 +255,37 @@
         }
         
         .control-btn {
-            background: none;
-            border: none;
             color: var(--text-color);
             cursor: pointer;
             font-size: 1.2rem;
+            background: var(--search-background);
+            padding: 12px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            transition: opacity 0.3s;
+            backdrop-filter: var(--edge-refraction-filter) saturate(2) blur(2.5px);
+            border-radius: 30px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--sun-shadow-strong), 0 0 15px rgba(0, 0, 0, 0.05);
+            justify-content: center;
+        }
+
+        #playPause {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            height: 100px;
+            width: 100px;
+            border-radius: 50%;
+            transform: translateX(-50%) translateY(-50%);
+            box-shadow: var(--sun-shadow-strong), 0 0 15px rgba(0, 0, 0, 0.05);
+            background-color: var(--overlay-color);
+        }
+
+        #playPause .material-symbols-rounded {
+            font-size: 60px;
+            font-variation-settings: 'FILL' 1, 'wght' 700, 'GRAD' 0, 'opsz' 48;
         }
         
         .video-info {
@@ -373,14 +408,16 @@
     <div class="main-content">
         <div class="video-container" id="videoContainer">
             <video id="videoPlayer"></video>
+            <button class="control-btn" id="playPause">
+                <span class="material-symbols-rounded">play_arrow</span>
+            </button>
             <div class="controls">
-                <button class="control-btn" id="playPause">
-                    <span class="material-symbols-rounded">play_arrow</span>
-                </button>
-                <div class="progress-bar">
-                    <div class="progress"></div>
+                <div class="progress-bar-container">
+                    <span class="time">--:-- / --:--</span>
+                    <div class="progress-bar">
+                        <div class="progress"></div>
+                    </div>
                 </div>
-                <span class="time">--:-- / --:--</span>
                 <button class="control-btn" id="fullscreen">
                     <span class="material-symbols-rounded">expand_content</span>
                 </button>
