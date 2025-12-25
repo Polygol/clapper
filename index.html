@@ -435,15 +435,13 @@
             <h2 id="videoTitle">No video playing</h2>
         </div>
         <div class="video-list"></div>
-        <label class="upload-btn">
+        <div class="upload-btn" id="addVideoBtn">
             <span class="material-symbols-rounded">add</span> Add
-            <input type="file" accept="video/*,.mkv" style="display: none" id="videoUpload">
-        </label>
+        </div>
     </div>
 
     <script>
         const videoList = document.querySelector('.video-list');
-        const videoUpload = document.getElementById('videoUpload');
         const videoPlayer = document.getElementById('videoPlayer');
         const videoTitle = document.getElementById('videoTitle');
         const playPauseBtn = document.getElementById('playPause');
@@ -641,9 +639,14 @@ function seekVideo(e) {
         }
 
         // Event listeners
-        videoUpload.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                addVideo(e.target.files[0]);
+        document.getElementById('addVideoBtn').addEventListener('click', async () => {
+            try {
+                const files = await Gurasuraisu.requestFile({ accept: 'video/*,.mkv', multiple: false });
+                if (files && files.length > 0) {
+                    addVideo(files[0]);
+                }
+            } catch (e) {
+                console.error("Video add failed", e);
             }
         });
 
