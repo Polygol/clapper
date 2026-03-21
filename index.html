@@ -524,7 +524,7 @@ progressBar.addEventListener('mousedown', (e) => {
         document.addEventListener('keydown', handleKeyboardControls);
 
 window.addEventListener('GurasuraisuVolumeChange', (e) => {
-    videoPlayer.volume = e.detail.level / 100;
+    videoPlayer.volume = e.detail.muted ? 0 : e.detail.level;
 });
 
 async function loadVideosFromStorage() {
