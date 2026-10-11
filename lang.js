@@ -1,4 +1,5 @@
-const LANG_EN_CLAPPER = {
+// Polygol Clapper Language Dictionary
+window.LANG_EN_CLAPPER = {
     TITLE: "Clapper",
     ADD_VIDEO: "Add Video",
     NO_VIDEO_PLAYING: "No video playing",
@@ -8,7 +9,7 @@ const LANG_EN_CLAPPER = {
     FULLSCREEN: "Fullscreen"
 };
 
-const LANG_JP_CLAPPER = {
+window.LANG_JP_CLAPPER = {
     TITLE: "Clapper",
     ADD_VIDEO: "ビデオを追加",
     NO_VIDEO_PLAYING: "ビデオが再生されていません",
@@ -18,7 +19,7 @@ const LANG_JP_CLAPPER = {
     FULLSCREEN: "全画面"
 };
 
-const LANG_KO_CLAPPER = {
+window.LANG_KO_CLAPPER = {
     TITLE: "Clapper",
     ADD_VIDEO: "비디오 추가",
     NO_VIDEO_PLAYING: "재생 중인 비디오가 없습니다",
@@ -28,7 +29,7 @@ const LANG_KO_CLAPPER = {
     FULLSCREEN: "전체 화면"
 };
 
-const LANG_ZH_CLAPPER = {
+window.LANG_ZH_CLAPPER = {
     TITLE: "Clapper",
     ADD_VIDEO: "添加视频",
     NO_VIDEO_PLAYING: "没有正在播放的视频",
@@ -37,3 +38,8 @@ const LANG_ZH_CLAPPER = {
     PAUSE: "暂停",
     FULLSCREEN: "全屏"
 };
+
+var LANG_EN_CLAPPER = window.LANG_EN_CLAPPER;
+var LANG_JP_CLAPPER = window.LANG_JP_CLAPPER;
+var LANG_KO_CLAPPER = window.LANG_KO_CLAPPER;
+var LANG_ZH_CLAPPER = window.LANG_ZH_CLAPPER;
